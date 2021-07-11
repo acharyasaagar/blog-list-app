@@ -20,7 +20,7 @@ jobs:
           node-version: '14'
       #------------------------------------------------------#
       - name: Install node (npm) dependencies
-        run: npm install
+        run: npm ci
       #------------------------------------------------------#
       - name: Format using prettier
         run: npm run format
@@ -46,11 +46,10 @@ jobs:
         env:
           TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          PORT: 8080
+          PORT: 8081
         with:
           command: npm run test:e2e
-          start: npm run start:test
-          wait-on: http://localhost:8080
+          wait-on: http://localhost:8081
       #------------------------------------------------------#
       #------------------------------------------------------#
       - name: deploy
