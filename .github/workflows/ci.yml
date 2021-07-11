@@ -1,0 +1,64 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  continuous_integration_workflow:
+    runs-on: ubuntu-20.04
+    steps:
+      #------------------------------------------------------#
+      - uses: actions/checkout@v2
+      #------------------------------------------------------#
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      #------------------------------------------------------#
+      - name: Install node (npm) dependencies
+        run: npm ci
+      #------------------------------------------------------#
+      - name: Format using prettier
+        run: npm run format
+      #------------------------------------------------------#
+      - name: Lint
+        run: npm run lint
+      #------------------------------------------------------#
+      - name: Build the react application
+        run: npm run build
+      #------------------------------------------------------#
+      - name: Run client tests
+        run: npm run test:client
+      #------------------------------------------------------#
+      - name: Run server tests
+        run: npm run test:server
+        env:
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PORT: 8080
+      #------------------------------------------------------#
+      - name: Run cypress end to end tests
+        uses: cypress-io/github-action@v2
+        env:
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PORT: 8080
+        with:
+          command: npm run test:e2e
+          start: npm run start:test # start and leave the server gh automatically cleans up running processes
+          wait-on: http://localhost:8080
+      #------------------------------------------------------#
+      #------------------------------------------------------#
+      - name: deploy
+        if: ${{ github.event_name == 'push' && !contains(github.event.commits[0].message, '#skip') }}
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: bloglistapp-fsopen
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          rollbackonhealthcheckfailed: true
+      #------------------------------------------------------#
