@@ -1,0 +1,41 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  continuous_integration_workflow:
+    runs-on: ubuntu-20.04
+    steps:
+      #------------------------------------------------------#
+      - uses: actions/checkout@v2
+      #------------------------------------------------------#
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      #------------------------------------------------------#
+      - name: Install node (npm) dependencies
+        run: npm install
+      #------------------------------------------------------#
+      - name: Format using prettier
+        run: npm run format
+      #------------------------------------------------------#
+      - name: Lint
+        run: npm run lint
+      #------------------------------------------------------#
+      - name: Build the react application
+        run: npm run build
+      #------------------------------------------------------#
+      - name: Run both client tests and server tests
+        run: npm run test
+      #------------------------------------------------------#
+      - name: Run cypress end to end tests
+        uses: cypress-io/github-action@v2
+        with:
+          command: npm run test:e2e
+      #------------------------------------------------------#
