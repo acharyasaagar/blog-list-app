@@ -49,6 +49,7 @@ jobs:
           PORT: 8081
         with:
           command: npm run test:e2e
+          start: npm run start:test # start and leave the server gh automatically cleans up running processes
           wait-on: http://localhost:8081
       #------------------------------------------------------#
       #------------------------------------------------------#
