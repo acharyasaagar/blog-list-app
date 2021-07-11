@@ -46,11 +46,11 @@ jobs:
         env:
           TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          PORT: 8081
+          PORT: 8080
         with:
           command: npm run test:e2e
           start: npm run start:test # start and leave the server gh automatically cleans up running processes
-          wait-on: http://localhost:8081
+          wait-on: http://localhost:8080
       #------------------------------------------------------#
       #------------------------------------------------------#
       - name: deploy
