@@ -31,11 +31,34 @@ jobs:
       - name: Build the react application
         run: npm run build
       #------------------------------------------------------#
-      - name: Run both client tests and server tests
-        run: npm run test
+      - name: Run client tests
+        run: npm run test:client
+      #------------------------------------------------------#
+      - name: Run server tests
+        run: npm run test:server
+        env:
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PORT: 8080
       #------------------------------------------------------#
       - name: Run cypress end to end tests
         uses: cypress-io/github-action@v2
+        env:
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PORT: 8080
         with:
           command: npm run test:e2e
+          start: npm run start:test
+          wait-on: http://localhost:8080
+      #------------------------------------------------------#
+      #------------------------------------------------------#
+      - name: deploy
+        if: ${{ github.event_name == 'push' && !contains(github.event.commits[0].message, '#skip') }}
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: bloglistapp-fsopen
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          rollbackonhealthcheckfailed: true
       #------------------------------------------------------#
